@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang='en'>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1"><!-- mobile -->
+		<link rel="icon" type="image/png" href="img/fortego_logo.png"><!-- favicon -->
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css"/>
+		<title>Shmoo</title>
+	</head>
+	<body ng-app="bbApp" ng-controller="gameController">
+		<!-- NAVBAR -->
+
+		<!-- END NAVBAR-->
+		
+		<!-- Gameboard -->
+		<div class="panel panel-default" ng-if="gameState=='started'">
+			<div class="panel-heading">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img class="pull-left" src="img/battlebitslogo.svg">
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="pull-right">Game Time Remaining: {{gameCountDown}}s</h3>
+                    </div>
+                </div>
+			</div>
+			<div class="panel-body">
+                <div class="col-md-2" ng-repeat="b in gameBytes track by $index" style="height:150px;">
+                    <button class="btn col-md-12" style="margin-bottom:5px;"><h3>0x{{formatHex(b)}}</h3></button>
+                    <h3 ng-if="playerOne>-1"><label class="label label-primary col-md-{{playerOne==playerTwo?'6':'12'}}" ng-if="playerOne==$index">Player 1</label></h3>
+                    <h3 ng-if="playerTwo>-1"><label class="label label-danger col-md-{{playerOne==playerTwo?'6':'12'}}" ng-if="playerTwo==$index">Player 2</label></h3>
+                </div>
+			</div>
+            <div class="panel-footer">
+                <div class="container">
+                    <div class="col-md-6">
+                        <div class="panel panel-{{playerOne>-1?'primary':'warning'}}" style="margin-bottom:0px;">
+                            <div class="panel-heading" style="text-align:center;">Player One</div>
+                            <div class="panel-body">
+                                <span ng-if="playerOne>-1" class="col-md-4"><h3 style="text-align:center;">Last Guess<button class="btn btn-primary" style="margin-bottom:0px;"><b>0x{{formatHex(guessOne)}}</b></button></h3></span>
+                                <span ng-if="playerOne>-1" class="col-md-4"><h4 style="text-align:center;">{{gameCountDown}}s</h4></span>
+                                <span ng-if="playerOne>-1" class="col-md-4"><h3 style="text-align:center;">Total Score<button class="btn btn-primary" style="margin-bottom:0px;"><b>{{playerOne}} / {{lastGameBytesLength}}</b></button></h3></span>
+                                <button ng-if="playerOne==-1" class="btn btn-default" style="margin-bottom:0px; text-align:center;">Player One Unregistered</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="panel panel-{{playerTwo>-1?'danger':'warning'}}" style="margin-bottom:0px;">
+                            <div class="panel-heading" style="text-align:center;">Player Two</div>
+                            <div class="panel-body">
+                                <span ng-if="playerTwo>-1" class="col-md-4"><h3 style="text-align:center;">Last Guess<button class="btn btn-danger" style="margin-bottom:0px;"><b>0x{{formatHex(guessTwo)}}</b></button></h3></span>
+                                <span ng-if="playerTwo>-1" class="col-md-4"><h4 style="text-align:center;">{{gameCountDown}}s</h4></span>
+                                <span ng-if="playerTwo>-1" class="col-md-4"><h3 style="text-align:center;">Total Score<button class="btn btn-danger" style="margin-bottom:0px;"><b>{{playerTwo}} / {{lastGameBytesLength}}</b></button></h3></span>
+                                <button ng-if="playerTwo==-1" class="btn btn-default" style="margin-bottom:0px; text-align:center;">Player Two Unregistered</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+		</div>
+		<!-- END Gameboard -->
+        
+        <!-- Between Games -->
+		<div class="panel panel-default" ng-if="gameState!='started'">
+			<div class="panel-heading">
+                <div class="container">
+                    <div class="col-md-12">
+                        <!--<button ng-audio="sounds/button-2.mp3" volume="0.5" start="0.2">Click me</button>-->
+                            <center>
+                                <img src="img/battlebitslogo.svg">
+                            </center>
+                        <!--<h3 style="text-align:center;">Fortego BattleBits</h3>-->
+                    </div>
+                </div>
+			</div>
+			<div class="panel-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="panel panel-{{gameState=='offline'?'warning':'success'}}">
+                            <div class="panel-heading"><h4>Game Information</h4></div>
+                            <div class="panel-body">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4>Previous Game 
+                                            <label class="label label-success pull-right">Game #{{gameNumber}}</label>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="col-md-6">
+                                            <div class="panel panel-primary" style="margin-bottom:0px;">
+                                                <div class="panel-heading" style="text-align:center;">Player One</div>
+                                                <div class="panel-body" ng-if="lastPlayerOne>-1">
+                                                    <span>Scored <button class="btn btn-primary" style="margin-bottom:0px;">{{lastPlayerOne}} / {{lastGameBytesLength}}</button></span>
+                                                    <span>in {{lastPlayerOneTime}}s</span>
+                                                </div>
+                                                <div class="panel-body" ng-if="lastPlayerOne==-1">
+                                                    <div class="alert alert-warning" style="margin:5px; text-align:center;">Did not play</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="panel panel-danger" style="margin-bottom:0px;">
+                                                <div class="panel-heading" style="text-align:center;">Player Two</div>
+                                                <div class="panel-body" ng-if="lastPlayerTwo>-1">
+                                                    <span>Scored <button class="btn btn-danger" style="margin-bottom:0px;">{{lastPlayerTwo}} / {{lastGameBytesLength}}</button></span>
+                                                    <span>in {{lastPlayerTwoTime}}s</span>
+                                                </div>
+                                                <div class="panel-body" ng-if="lastPlayerTwo==-1">
+                                                    <div class="alert alert-warning" style="margin:5px; text-align:center;">Did not play</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4>Next Game 
+                                            <label class="label label-{{gameState=='offline'?'warning':'success'}} pull-right">Status: {{gameState}}</label>
+                                        </h4>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="col-md-6">
+                                            <div class="alert alert-{{playerOne>-1?'success':'warning'}}" style="margin:5px; text-align:center;">
+                                                Player One {{playerOne>-1?'Ready!':'Unregistered'}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="alert alert-{{playerTwo>-1?'success':'warning'}}" style="margin:5px; text-align:center;">
+                                                Player Two {{playerTwo>-1?'Ready!':'Unregistered'}}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12" ng-if="playerOne>-1 || playerTwo>-1">
+                                            <h3><div class="alert alert-info" style="margin:5px; text-align:center;">Game Starts in {{playerCountDown}}</div></h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-success">
+                            <div class="panel-heading"><h4>Leaderboard</h4></div>
+                            <div class="panel-body">
+                                <div class="col-md-12">
+                                    <table class="table table-bordered table-striped table-hover table-condensed">
+                                        <thead><th>Rank</th><th>Time</th><th>Score</th><th>Game</th></thead>
+                                        <tr ng-repeat="s in scoreboard track by $index" class="{{getClass(s)}}">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{s.seconds}}</td>
+                                            <td>{{s.num_bytes}}</td>
+                                            <td>{{s.game_num}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="panel panel-success">
+                            <div class="panel-heading"><h4>Fortego Scores</h4></div>
+                            <div class="panel-body">
+                                <div class="col-md-12">
+                                    <table class="table table-bordered table-striped table-hover table-condensed">
+                                        <thead><th>Rank</th><th>Name</th><th>Time</th><th>Score</th><th>Game</th></thead>
+                                        <tr ng-repeat="s in fortegoScoreboard track by $index" class="{{getClass(s)}}">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{s.player_name}}</td>
+                                            <td>{{s.seconds}}</td>
+                                            <td>{{s.num_bytes}}</td>
+                                            <td>{{s.game_num}}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+            <div class="panel-footer">
+                <div class="container">
+                <div class="col-md-12">
+                    <div class="alert alert-info" style="margin:5px; text-align:center;">Top 3 players win a prize!</div>
+                </div>
+                </div>
+            </div>
+		</div>
+		<!-- END Leaderboard -->
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/angular.min.js"></script>
+        <script src="js/angular-resource.min.js"></script>
+        <script src="js/angular.audio.js"></script>
+        <script src="js/mqtt.js"></script>
+        <script src="js/battlebits.js"></script>
+	</body>
+</html>

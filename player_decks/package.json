@@ -1,0 +1,21 @@
+{
+  "name": "player_deck",
+  "version": "0.0.0",
+  "description": "shmoo controller for battle bits",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "riley porter",
+  "license": "ISC",
+  "dependencies": {
+    "bot-io": "^0.1.1",
+    "max7219": "^1.0.1",
+    "miff": "^0.2.0",
+    "mqtt": "^1.6.1",
+    "my-ip": "^1.1.1"
+  },
+  "devDependencies": {
+    "cli-clear": "^1.0.4"
+  }
+}

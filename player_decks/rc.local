@@ -1,0 +1,18 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+echo BB-SPI1-01 > /sys/devices/bone_capemgr.9/slots
+export PATH=~/var/lib/cloud9/battlebits/player_decks:$PATH
+/var/lib/cloud9/battlebits/player_decks/start.sh &
+
+http-server /var/lib/cloud9/battlebits/display -p9090 -c-1
+exit 0
